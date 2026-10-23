@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1: El Valor de Mi Trabajo - Puma Energy</title>
+    <!-- jsPDF Library for generating PDF files directly in browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --puma-green: #00875A;
+            --puma-green-dark: #006644;
+            --puma-red: #E31837;
+            --puma-red-dark: #B8102A;
+            --puma-white: #FFFFFF;
+            --puma-dark: #12181E;
+            --puma-gray-bg: #F4F6F8;
+            --puma-gray-card: #FFFFFF;
+            --puma-border: #E2E8F0;
+            --puma-text: #1E293B;
+            --puma-text-muted: #64748B;
+        }
+
+        @page { margin: 0; }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        html { background-color: #12181E; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body {
+            padding: 24px 0;
+            margin: 0 auto;
+            max-width: 900px !important;
+            border: none !important;
+            background: transparent !important;
+            color: var(--puma-text);
+        }
+
+        .page {
+            min-height: 297mm;
+            margin: 0 auto 12px auto;
+            padding: 16mm 18mm 12mm 18mm;
+            background-color: var(--puma-white);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-radius: 4px;
+        }
+
+        @media screen and (max-width: 600px) {
+            body { padding: 0; }
+            .page {
+                margin: 0;
+                border: none;
+                border-radius: 0;
+                padding: 14px 16px;
+                min-height: 100vh;
+            }
+        }
+
+        .page-content {
+            flex: 1 1 0;
+            min-height: 0;
+        }
+
+        /* Header Bar */
+        .puma-header {
+            background-color: var(--puma-dark);
+            color: var(--puma-white);
+            padding: 16px 20px;
+            border-bottom: 4px solid var(--puma-red);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .puma-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .puma-logo-badge {
+            background-color: var(--puma-red);
+            color: var(--puma-white);
+            font-weight: 900;
+            padding: 6px 12px;
+            letter-spacing: 2px;
+            font-size: 14pt;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .puma-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: var(--puma-white);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .puma-subtitle {
+            font-size: 8.5pt;
+            color: #A0AEC0;
+            margin: 0;
+        }
+
+        /* Stepper Progress Bar */
+        .progress-bar-container {
+            background-color: var(--puma-gray-bg);
+            border: 1px solid var(--puma-border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 8px;
+            background-color: #CBD5E1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 20%;
+            background-color: var(--puma-green);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 8.5pt;
+            font-weight: 700;
+            color: var(--puma-green-dark);
+            white-space: nowrap;
+        }
+
+        /* Section Cards */
+        .module-section {
+            display: none;
+        }
+
+        .module-section.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--puma-white);
+            border: 1px solid var(--puma-border);
+            border-left: 5px solid var(--puma-green);
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+        }
+
+        .card.red-accent {
+            border-left-color: var(--puma-red);
+        }
+
+        .card-title {
+            font-size: 12pt;
+            font-weight: 800;
+            color: var(--puma-dark);
+            margin-top: 0;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .badge {
+            background-color: var(--puma-green);
+            color: var(--puma-white);
+            font-size: 8pt;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .card-title .badge.red {
+            background-color: var(--puma-red);
+        }
+
+        p, li {
+            font-size: 10pt;
+            line-height: 1.45;
+            color: var(--puma-text);
+        }
+
+        /* Forms and Inputs */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 9pt;
+            font-weight: 700;
+            color: var(--puma-dark);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 9.5pt;
+            border: 1px solid var(--puma-border);
+            border-radius: 4px;
+            background-color: var(--puma-gray-bg);
+            color: var(--puma-dark);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--puma-green);
+            background-color: var(--puma-white);
+        }
+
+        /* Interactive Grid & Buttons */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media screen and (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px 18px;
+            font-size: 10pt;
+            font-weight: 800;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-puma-green {
+            background-color: var(--puma-green);
+            color: var(--puma-white);
+        }
+
+        .btn-puma-green:hover {
+            background-color: var(--puma-green-dark);
+        }
+
+        .btn-puma-red {
+            background-color: var(--puma-red);
+            color: var(--puma-white);
+        }
+
+        .btn-puma-red:hover {
+            background-color: var(--puma-red-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--puma-dark);
+            color: var(--puma-dark);
+        }
+
+        /* Quiz Radio Boxes */
+        .quiz-option {
+            background-color: var(--puma-gray-bg);
+            border: 1px solid var(--puma-border);
+            border-radius: 6px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .quiz-option:hover {
+            background-color: #E2E8F0;
+        }
+
+        .quiz-option input[type="radio"] {
+            margin-top: 3px;
+            accent-color: var(--puma-green);
+        }
+
+        .quiz-option-text {
+            font-size: 9.5pt;
+            color: var(--puma-text);
+        }
+
+        /* Footer */
+        .page-footer {
+            flex-shrink: 0;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--puma-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 8.5pt;
+            color: var(--puma-text-muted);
+        }
+
+        /* Cert Strip */
+        .cert-box {
+            border: 2px dashed var(--puma-green);
+            background-color: #F0FDF4;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="page">
+        <div class="page-content">
+            
+            <!-- Header Puma -->
+            <div class="puma-header">
+                <div class="puma-brand">
+                    <div class="puma-logo-badge">PUMA</div>
+                    <div>
+                        <h1 class="puma-title">Escuela de Pista</h1>
+                        <p class="puma-subtitle">Programa Nacional de Capacitación</p>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 8.5pt; color: #CBD5E1; font-weight: 700;">MÓDULO 1</span>
+                </div>
+            </div>
+
+            <!-- Barra de Progreso -->
+            <div class="progress-bar-container">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Paso 1 de 5</div>
+            </div>
+
+            <!-- PASO 1: REGISTRO E IDENTIFICACIÓN -->
+            <div class="module-section active" id="sec1">
+                <div class="card">
+                    <h2 class="card-title">
+                        <span>Registro de Capacitación</span>
+                        <span class="badge">Inicio</span>
+                    </h2>
+                    <p>Bienvenido al <strong>Módulo 1: El Valor de Mi Trabajo y Venta Completa</strong>. Por favor completa tus datos para habilitar tu evaluación y registro de avance en la estación.</p>
+                    
+                    <div class="form-group">
+                        <label>Nombre y Apellido Completo</label>
+                        <input type="text" class="form-control" id="userName" placeholder="Ej. Juan Pérez">
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Estación de Servicio / Concesionario</label>
+                            <input type="text" class="form-control" id="userStation" placeholder="Ej. Puma La Chorrera">
+                        </div>
+                        <div class="form-group">
+                            <label>Edad</label>
+                            <select class="form-control" id="userAge">
+                                <option value="">Seleccionar Rango</option>
+                                <option value="18-25">18 - 25 años</option>
+                                <option value="26-35">26 - 35 años</option>
+                                <option value="36-45">36 - 45 años</option>
+                                <option value="46+">46+ años</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card red-accent">
+                    <h2 class="card-title">
+                        <span>El Propósito de Tu Rol</span>
+                        <span class="badge red">Reflexión</span>
+                    </h2>
+                    <p>En Puma Energy no solo despachamos combustible: <strong>construimos confianza y guiamos al cliente en su camino</strong>. Este módulo te dará herramientas para ver tu turno como una oportunidad de crecimiento personal, profesional y de orgullo propio.</p>
+                </div>
+
+                <button class="btn btn-puma-green" onclick="goToStep(2)">Comenzar Lección 1 &rarr;</button>
+            </div>
+
+            <!-- PASO 2: ÉTICA Y TRABAJO CON PROPÓSITO -->
+            <div class="module-section" id="sec2">
+                <div class="card">
+                    <h2 class="card-title">
+                        <span>Lección 1: Ética y Orgullo Profesional</span>
+                    </h2>
+                    <p><strong>¿Qué es ser un Profesional de Pista?</strong></p>
+                    <ul>
+                        <li><strong>Integridad y Honestidad:</strong> Ser transparente en cada cobro, entregar vuelto exacto y llevar un cuadre de turno pulcro.</li>
+                        <li><strong>Responsabilidad con tu Futuro:</strong> El trabajo no es solo "cumplir 8 horas", es una escuela de disciplina, trato con clientes y organización que te acompañará toda tu vida.</li>
+                        <li><strong>Cero Descuadres:</strong> Un arqueo correcto no es solo una regla del concesionario; es tu paz mental al finalizar el turno.</li>
+                    </ul>
+                </div>
+
+                <div class="card red-accent">
+                    <h3 class="card-title">Pregunta de Autoevaluación Ética</h3>
+                    <p><strong>¿Cómo defines la honestidad en tu isla de despacho?</strong></p>
+                    
+                    <label class="quiz-option">
+                        <input type="radio" name="p1" value="A">
+                        <span class="quiz-option-text">Solo entregar el vuelto si el cliente lo pide explícitamente.</span>
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="p1" value="B">
+                        <span class="quiz-option-text">Garantizar la marcación en cero, cobro exacto y transparencia total en cada cliente sin excepciones.</span>
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="p1" value="C">
+                        <span class="quiz-option-text">Depende de la cantidad de tráfico de autos que haya en la estación.</span>
+                    </label>
+                </div>
+
+                <div class="grid-2">
+                    <button class="btn btn-outline" onclick="goToStep(1)">&larr; Atrás</button>
+                    <button class="btn btn-puma-green" onclick="goToStep(3)">Siguiente Lección &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASO 3: LA VENTA COMPLETA -->
+            <div class="module-section" id="sec3">
+                <div class="card">
+                    <h2 class="card-title">
+                        <span>Lección 2: La Cadena de la Venta Completa</span>
+                    </h2>
+                    <p>Para ser un embajador de marca efectivo, tu meta en cada atención debe ser lograr la <strong>Venta Completa</strong> a través de 4 pasos continuos:</p>
+                    
+                    <div style="margin-top: 10px;">
+                        <div style="padding: 8px 12px; background: #F0FDF4; border-left: 4px solid var(--puma-green); margin-bottom: 6px;">
+                            <strong>1. Excelente Experiencia:</strong> Saludo cordial, contacto visual y sonrisa real.
+                        </div>
+                        <div style="padding: 8px 12px; background: #FEF2F2; border-left: 4px solid var(--puma-red); margin-bottom: 6px;">
+                            <strong>2. Fidelización Puma PRIS:</strong> Ofrecer y escanear la app para que el cliente acumule puntos y regrese.
+                        </div>
+                        <div style="padding: 8px 12px; background: #F0FDF4; border-left: 4px solid var(--puma-green); margin-bottom: 6px;">
+                            <strong>3. Venta de Lubricantes:</strong> Sugerir revisión de niveles de aceite con actitud servicial para cuidar su motor.
+                        </div>
+                        <div style="padding: 8px 12px; background: #FEF2F2; border-left: 4px solid var(--puma-red); margin-bottom: 6px;">
+                            <strong>4. Cierre Impecable:</strong> Cobro transparente, despedida fluida y reporte correcto en caja.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card red-accent">
+                    <h3 class="card-title">Pregunta sobre Venta Completa</h3>
+                    <p><strong>Un cliente solicita $10 de combustible apresurado. ¿Cuál es la actitud de un Profesional Puma?</strong></p>
+                    
+                    <label class="quiz-option">
+                        <input type="radio" name="p2" value="A">
+                        <span class="quiz-option-text">Despachar rápido, cobrar e irse sin cruzar palabra.</span>
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="p2" value="B">
+                        <span class="quiz-option-text">Saludar con fluidez, escanear Puma PRIS mientras carga y ofrecer una revisión rápida de aceite para garantizar su viaje seguro.</span>
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="p2" value="C">
+                        <span class="quiz-option-text">Obligarlo a comprar un cuarto de aceite antes de despachar combustible.</span>
+                    </label>
+                </div>
+
+                <div class="grid-2">
+                    <button class="btn btn-outline" onclick="goToStep(2)">&larr; Atrás</button>
+                    <button class="btn btn-puma-green" onclick="goToStep(4)">Caso Práctico &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASO 4: SIMULACIÓN DE CASO PRÁCTICO -->
+            <div class="module-section" id="sec4">
+                <div class="card">
+                    <h2 class="card-title">
+                        <span>Lección 3: Caso Práctico en Pista</span>
+                    </h2>
+                    <p><strong>Escenario:</strong> Un vehículo particular llega a la estación. El conductor se ve indeciso sobre qué lubricante usar y menciona que tiene prisa.</p>
+                </div>
+
+                <div class="card red-accent">
+                    <h3 class="card-title">Selecciona tu Acción de Servicio:</h3>
+                    
+                    <label class="quiz-option">
+                        <input type="radio" name="p3" value="A">
+                        <span class="quiz-option-text">Decirle que revise el manual del auto en su casa porque no hay tiempo.</span>
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="p3" value="B">
+                        <span class="quiz-option-text">Ofrecerle el lubricante más caro sin explicarle por qué.</span>
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="p3" value="C">
+                        <span class="quiz-option-text">Recomendarle con seguridad el lubricante Puma adecuado a su motor, explicarle brevemente la protección que brinda y sumarle sus puntos en Puma PRIS.</span>
+                    </label>
+                </div>
+
+                <div class="grid-2">
+                    <button class="btn btn-outline" onclick="goToStep(3)">&larr; Atrás</button>
+                    <button class="btn btn-puma-red" onclick="evaluateAndFinish()">Finalizar Evaluación &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASO 5: RESULTADO Y CERTIFICADO DESCARGABLE EN PDF -->
+            <div class="module-section" id="sec5">
+                <div class="card" style="border-left-color: var(--puma-green); text-align: center;">
+                    <h2 style="color: var(--puma-green-dark); margin-top: 0;">¡Módulo Completado Exitosamente!</h2>
+                    <p>Has finalizado el <strong>Módulo 1: El Valor de Mi Trabajo y Venta Completa</strong>.</p>
+                    
+                    <div style="font-size: 24pt; font-weight: 900; color: var(--puma-dark); margin: 12px 0;" id="scoreDisplay">
+                        -- / 100 PTS
+                    </div>
+                    
+                    <p id="feedbackText" style="font-size: 9.5pt; color: var(--puma-text-muted);"></p>
+                </div>
+
+                <div class="cert-box">
+                    <h3 style="margin-0 0 8px 0; color: var(--puma-dark);">Comprobante Oficial de Avance</h3>
+                    <p style="margin-bottom: 12px;">Descarga tu certificado firmado digitalmente en formato PDF para presentarlo a tu capacitador de estación en su próxima visita en sitio.</p>
+                    
+                    <button class="btn btn-puma-green" onclick="generatePDF()">
+                        &DownArrow; Descargar Informe / Certificado PDF
+                    </button>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <button class="btn btn-outline" onclick="resetForm()">Reiniciar Módulo</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footnote / Footer -->
+        <footer class="page-footer">
+            <span>Puma Energy - Capacitación Operativa en Sitio</span>
+            <span id="dateStamp">2026 - 2029</span>
+        </footer>
+    </section>
+
+    <script>
+        let currentStep = 1;
+        let userData = {
+            name: '',
+            station: '',
+            age: '',
+            score: 0,
+            answers: {}
+        };
+
+        function goToStep(step) {
+            // Validate step 1
+            if (step === 2 && currentStep === 1) {
+                const name = document.getElementById('userName').value.trim();
+                const station = document.getElementById('userStation').value.trim();
+                const age = document.getElementById('userAge').value;
+
+                if (!name || !station || !age) {
+                    alert('Por favor completa todos tus datos personales antes de continuar.');
+                    return;
+                }
+
+                userData.name = name;
+                userData.station = station;
+                userData.age = age;
+            }
+
+            document.querySelectorAll('.module-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(`sec${step}`).classList.add('active');
+
+            currentStep = step;
+            
+            // Progress Update
+            const pct = (step / 5) * 100;
+            document.getElementById('progressFill').style.width = `${pct}%`;
+            document.getElementById('progressText').innerText = `Paso ${step} de 5`;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function evaluateAndFinish() {
+            // Check answers
+            const p1 = document.querySelector('input[name="p1"]:checked');
+            const p2 = document.querySelector('input[name="p2"]:checked');
+            const p3 = document.querySelector('input[name="p3"]:checked');
+
+            if (!p1 || !p2 || !p3) {
+                alert('Por favor responde a todas las preguntas antes de finalizar la evaluación.');
+                return;
+            }
+
+            let score = 0;
+            if (p1.value === 'B') score += 33;
+            if (p2.value === 'B') score += 33;
+            if (p3.value === 'C') score += 34;
+
+            userData.score = score;
+            userData.answers = {
+                p1: p1.value,
+                p2: p2.value,
+                p3: p3.value
+            };
+
+            document.getElementById('scoreDisplay').innerText = `${score} / 100 PTS`;
+            
+            const feedback = document.getElementById('feedbackText');
+            if (score >= 90) {
+                feedback.innerText = '¡Excelente comprensión del propósito, la ética y la venta completa Puma! Eres un ejemplo de embajador de marca.';
+            } else if (score >= 60) {
+                feedback.innerText = 'Buen trabajo. Repasa los pilares de servicio con tu capacitador en la próxima visita para afinar los detalles de Puma PRIS y lubricantes.';
+            } else {
+                feedback.innerText = 'Te sugerimos repasar el módulo y conversar con tu capacitador para reforzar las bases de atención y transparencia.';
+            }
+
+            goToStep(5);
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // Colors
+            const green = [0, 135, 90];
+            const red = [227, 24, 55];
+            const dark = [18, 24, 30];
+
+            // Header Banner
+            doc.setFillColor(...dark);
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            // Red accent bar
+            doc.setFillColor(...red);
+            doc.rect(0, 35, 210, 3, 'F');
+
+            // Logo Badge
+            doc.setFillColor(...red);
+            doc.rect(15, 10, 30, 12, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('PUMA', 18, 18);
+
+            // Title Header
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('CERTIFICADO DE CAPACITACIÓN EN PISTA', 52, 16);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(200, 200, 200);
+            doc.text('Programa Nacional de Desarrollo de Pisteros Profesionales', 52, 23);
+
+            // Body Content
+            doc.setTextColor(...dark);
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.text('REPORTE DE EVALUACIÓN - MÓDULO 1', 15, 52);
+
+            // Green Line
+            doc.setDrawColor(...green);
+            doc.setLineWidth(1);
+            doc.line(15, 56, 195, 56);
+
+            // User Info Box
+            doc.setFillColor(244, 246, 248);
+            doc.rect(15, 62, 180, 45, 'F');
+            doc.setDrawColor(226, 232, 240);
+            doc.rect(15, 62, 180, 45, 'S');
+
+            doc.setFontSize(10);
+            doc.setTextColor(...dark);
+            doc.setFont('helvetica', 'bold');
+            doc.text('DATOS DEL COLABORADOR:', 20, 70);
+
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Nombre del Pistero: ${userData.name}`, 20, 78);
+            doc.text(`Estación / Concesionario: ${userData.station}`, 20, 85);
+            doc.text(`Rango de Edad: ${userData.age}`, 20, 92);
+            doc.text(`Fecha de Finalización: ${new Date().toLocaleDateString('es-ES')}`, 20, 99);
+
+            // Score Box
+            doc.setFillColor(...green);
+            doc.rect(140, 68, 50, 33, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text('CALIFICACIÓN', 148, 76);
+            doc.setFontSize(18);
+            doc.text(`${userData.score}/100`, 147, 88);
+
+            // Module Summary
+            doc.setTextColor(...dark);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('COMPETENCIAS EVALUADAS EN EL MÓDULO 1:', 15, 120);
+
+            const competencies = [
+                ['Ética y Trabajo con Propósito', 'Entendido - Compromiso de transparencia y honestidad en el turno.'],
+                ['Concepto de Venta Completa', 'Entendido - Servicio + Puma PRIS + Lubricantes + Cierre.'],
+                ['Experiencia de Cliente', 'Entendido - Fluidez, buena actitud y fidelización efectiva.'],
+                ['Cuadre de Caja Transparente', 'Entendido - Precisión y responsabilidad en la entrega de turno.']
+            ];
+
+            let y = 130;
+            competencies.forEach(([comp, state]) => {
+                doc.setFillColor(240, 253, 244);
+                doc.rect(15, y, 180, 12, 'F');
+                doc.setDrawColor(...green);
+                doc.rect(15, y, 2, 12, 'F');
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...dark);
+                doc.text(comp, 20, y + 8);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(100, 116, 139);
+                doc.text(state, 85, y + 8);
+
+                y += 16;
+            });
+
+            // Signatures block
+            y = 220;
+            doc.setDrawColor(150, 150, 150);
+            doc.line(25, y, 85, y);
+            doc.line(125, y, 185, y);
+
+            doc.setFontSize(9);
+            doc.setTextColor(...dark);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Firma del Pistero Evaluado', 32, y + 6);
+            doc.text('Firma / Sello del Capacitador', 130, y + 6);
+
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Este documento sirve como comprobante de cumplimiento del Plan Anual de Capacitación Puma Energy 2026-2029.', 15, 280);
+
+            // Save PDF
+            doc.save(`Certificado_Modulo1_${userData.name.replace(/\s+/g, '_')}.pdf`);
+        }
+
+        function resetForm() {
+            document.getElementById('userName').value = '';
+            document.getElementById('userStation').value = '';
+            document.getElementById('userAge').value = '';
+            document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+            goToStep(1);
+        }
+
+        // Set Current Year
+        document.getElementById('dateStamp').innerText = `Capacitación Puma © ${new Date().getFullYear()}`;
+    </script>
+</body>
+</html>
